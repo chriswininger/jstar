@@ -1,0 +1,138 @@
+<!--
+    * jstar JavaScript Library v0.0.01a
+    * https://github.com/chriswininger/jstar
+    *
+    * Copyright 2013 Chris Wininger
+    * Released under the MIT license
+    * https://github.com/chriswininger/jstar/license
+    *
+    * Date: Sat Apr 20 2013
+    * -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>jsTar Example</title>
+
+    <script type="text/javascript" src="jstar.js"></script>
+    <script type="text/javascript">
+        (function (window) {
+            var txtTextFileName1, txtTextFileName2, txtTextFileContents1, txtTextFileContents2, btnExportTar, lblErrorMessage, fileChooser;
+            var fileSelection = null;
+
+            window.onload = function() {
+                txtTextFileName1 = document.getElementById('txtTextFileName1');
+                txtTextFileName2 = document.getElementById('txtTextFileName2');
+                txtTextFileContents1 = document.getElementById('txtTextFileContents1');
+                txtTextFileContents2 = document.getElementById('txtTextFileContents2');
+
+                btnExportTar = document.getElementById('btnExportTar');
+                lblErrorMessage = document.getElementById('lblErrorMessage');
+                fileChooser = document.getElementById('fileChooser');
+
+
+                fileChooser.addEventListener('change', function (event){
+                    var files = event.target.files;
+
+                    for (var i = 0, f; f = files[i]; i++) {
+                        var reader = new FileReader();
+
+                        // Closure to capture the file information.
+                        reader.onload = (function(file) {
+                            return function(e){
+                                fileSelection = {'name': file.name, 'data': this.result };
+                            }
+                        })(f);
+
+                        reader.readAsBinaryString(f);
+                    }
+
+                }, false);
+
+                // Convert the text value and save
+                btnExportTar.addEventListener('click', function(event) {
+                    if (validateForm()) {
+                        var arrayFiles = [
+                            { 'name': txtTextFileName1.value, 'data': txtTextFileContents1.value },
+                            { 'name': txtTextFileName2.value, 'data': txtTextFileContents2.value },
+                        ];
+
+                        if (fileSelection !== null) {
+                            arrayFiles.push(fileSelection);
+                        }
+
+                        jsTar.toTar(arrayFiles, {
+                            'complete': tarComplete,
+                            'error': tarError
+                            });
+                    } else {
+                        lblErrorMessage.innerHTML = 'Please choose a valid name for each text file.';
+                    }
+                }, false);
+            };
+
+            function tarComplete(info) {
+                if (info.status === 'success') {
+                    // Save the blob to disk
+                    window.location.href =  window.URL.createObjectURL(info.data);
+                } else {
+                    lblErrorMessage.innerHTML = info.message;
+                }
+            }
+
+            function tarError (info) {
+                lblErrorMessage.innerHTML = info.message;
+            }
+
+            function validateForm() {
+                return txtTextFileName1.value.length > 0 && txtTextFileName2.value.length > 0;
+            }
+
+        })(window);
+    </script>
+</head>
+<body>
+<div>
+    <strong id = "lblErrorMessage"></strong>
+</div>
+
+<div>
+    <h3>The following fields will appear in the tar as text files</h3>
+</div>
+
+<div>
+    <label for="txtTextFileName1">File Name: </label>
+    <input  type="text" id="txtTextFileName1">
+
+    <span>, </span>
+
+    <label for="txtTextFileContents1">File Contents: </label>
+    <input  type="text" id="txtTextFileContents1">
+</div>
+<div>
+    <label for="txtTextFileName2">File Name: </label>
+    <input  type="text" id="txtTextFileName2">
+
+    <span>, </span>
+
+    <label for="txtTextFileContents2">File Contents: </label>
+    <input  type="text" id="txtTextFileContents2">
+</div>
+
+<hr />
+
+<div>
+    <h3>The following file selected from your hard drive will be included in the tar</h3>
+</div>
+
+<div>
+    <input type="file" id = "fileChooser" />
+</div>
+
+<hr />
+
+<div>
+    <button id="btnExportTar">Export Tar</button>
+</div>
+
+</body>
+</html>
