@@ -4,7 +4,7 @@
  *
  * Copyright 2013 Chris Wininger
  * Released under the MIT license
- * https://github.com/chriswininger/jstar/license
+ * https://github.com/chriswininger/jstar/blob/master/license.md
  *
  * Date: Sat Apr 20 2013
  */
